@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 	
 setup_args = dict(
     name='chatbotpackage',
-    version='0.1',
+    version='0.7',
     description='chatbotpackage',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,
@@ -17,8 +17,8 @@ setup_args = dict(
     author='Shinjini Ray',
     author_email='shinjini.ray@gmail.com',
     keywords=['chatbot', 'neuralnetwork'],
-    url='https://github.com/shinjiniray/loganalysispackage',
-    download_url='https://pypi.org/project/chatbotpackage'
+    url='https://github.com/shinjiniray/chatbotpackage.git',
+    download_url='https://pypi.org/project/chatbotpackage',
 )
 
 install_requires = [
@@ -56,4 +56,4 @@ install_requires = [
 ]
 
 if __name__ == '__main__':
-    setup(**setup_args, install_requires=install_requires)
+    setup(**setup_args, install_requires=install_requires, include_package_data=True)
