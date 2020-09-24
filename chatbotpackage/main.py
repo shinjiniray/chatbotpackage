@@ -13,11 +13,10 @@ import re
 import logging
 import sys, setuptools, tokenize
 
-
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
-PORT = 5000        # Port to listen on (non-privileged ports are > 1023)
+PORT = 5000  # Port to listen on (non-privileged ports are > 1023)
 
-socketId = ''       #For using in case user directly closes browser
+socketId = ''  # For using in case user directly closes browser
 # context = ssl._SSLContext
 # context.load_cert_chain('cert.pem', 'key.pem')
 
@@ -50,11 +49,13 @@ def handle_my_custom_event(payload):
     socketId = payload["sockid"]
     sio.emit('response', '{"msg":"Hello"}')
 
+
 @sio.on('disconnect')
 def handle_disconnect():
     print('inside  socket handle_disconnect')
     print('socketId: ' + socketId)
     clear_expired_contexts(socketId)
+
 
 # =================================================================================================
 # Section for socket routing
@@ -71,6 +72,7 @@ def handle_disconnect():
 def home_general():
     return render_template("chatbot.html")
 
+
 @app.route("/bank")
 def home_bank():
     # parser['clients']['client'] = 'bank'
@@ -81,6 +83,7 @@ def home_bank():
     # parser.clear
     return render_template("chatbot.html")
 
+
 @app.route("/healthcare")
 def home_healthcare():
     # parser.add_section('clients')
@@ -90,9 +93,11 @@ def home_healthcare():
     # parser.clear
     return render_template("chatbot.html")
 
+
 @app.route("/admin")
 def admin():
     return render_template("admin.html")
+
 
 # =================================================================================================
 
@@ -105,7 +110,7 @@ def chatcomm():
     client = request.json["input"]["client"]
     print("msg : " + msg + ": client : " + client)
     # if current_context != "" :
-    if msg == "welcome" :
+    if msg == "welcome":
         # event_name = request.json["input"]["socket_id"]+"_my_message"
         # print("event_name: " + event_name)
         # sio.emit(event_name,"Welcome to Lima Chat Support Agent")   
@@ -114,39 +119,39 @@ def chatcomm():
     else:
         try:
             if "id" in msg:
-                event_name = request.json["input"]["socket_id"]+"_my_message"
+                event_name = request.json["input"]["socket_id"] + "_my_message"
                 print("event_name: " + event_name)
-                sio.emit(event_name,"Please wait this may take upto few minutes!!")
+                sio.emit(event_name, "Please wait this may take upto few minutes!!")
             # if msg != '' and client!='':
-            if client!='':
+            if client != '':
                 # ints = predict_class(msg)
                 # result = getResponse(ints, intents, msg)
-                result = send(sio,request.json)
+                result = send(sio, request.json)
         except Exception as e:
-            print('chatcomm:: /api/message Failed: '+ str(e))
-            result = "Oops! it seems there is some difficulties in the system, please try again later"   
-        
+            print('chatcomm:: /api/message Failed: ' + str(e))
+            result = "Oops! it seems there is some difficulties in the system, please try again later"
+
         try:
             print(result)
             result_text = result['response']
             result_tag = result['tag']
-            res = '{"output":{"tag": "' + result_tag + '", "text":"' + result_text + '"}}'  
+            res = '{"output":{"tag": "' + result_tag + '", "text":"' + result_text + '"}}'
             print('response to chat window: ' + res)
             reply = json.loads(res)
             print(reply["output"])
             print(reply)
         except Exception as e:
-            print('chatcomm:: /api/message Failed: '+ str(e))
+            print('chatcomm:: /api/message Failed: ' + str(e))
             # result = "Oops! it seems there is some difficultie(s) in the system, please try again later"
-        
+
         return reply
-    
+
 
 # Running the training module
 @app.route("/api/training", methods=['GET', 'POST'])
 def systemtraining():
     print('====Inside systemtraining====')
-    req_data=request.get_data()
+    req_data = request.get_data()
     req_data_json = json.loads(req_data)
     print(req_data)
     print(req_data_json['client'])
@@ -157,7 +162,7 @@ def systemtraining():
         return reply
     else:
         return str(False)
-    
+
 
 # Uploading file from admin portal
 @app.route("/api/fileupload", methods=['GET', 'POST'])
@@ -168,17 +173,19 @@ def systemfileupload():
     print('fileupload from main: ' + reply)
     return reply
 
+
 # getting the client names
 @app.route("/api/getclients", methods=['GET', 'POST'])
-def getclients():    
+def getclients():
     print('====Inside getclients====')
     reply = gettrainingclients()
     # print('fileupload from main: ' + reply)
     return reply
 
+
 # Clearing the expired sessions
 @app.route("/api/clearsessions", methods=['GET', 'POST'])
-def clear_context_sessions():    
+def clear_context_sessions():
     print('====Inside clear_context_sessions====')
     print(request.data)
     print(type(request.data))
@@ -188,8 +195,9 @@ def clear_context_sessions():
     reply = clear_expired_contexts(request_json['sockid'])
     return str(reply)
 
+
 # =================================================================================
-    # Definition of facebook social media functions
+# Definition of facebook social media functions
 # =================================================================================
 @app.route("/api/fb", methods=['GET', 'POST'])
 def fbchat():
@@ -228,26 +236,24 @@ def fbchat():
             else:
                 return "error", 503
     except Exception as e:
-        print('fbchat:: /api/fb Failed: '+ str(e))
+        print('fbchat:: /api/fb Failed: ' + str(e))
         sendtofb(sender_id, "Thanks")
-        return "success", 200    
+        return "success", 200
 
 
 def sendtofb(sender_id, text):
-
     try:
         access_token = "EAAUmPFiFbvMBAGbLJAyLzvF4F1LzKG4nw9ZBcO8LNJCGdoQqAHAM0uGTpJZBCU11KaHG8f9lofZAz1exb9wFoEhZBAAh97kIVya30ZAwL7Taq3OChRFoXPpsZBbaQmI7dIVvZArTkcfVj8s3y9LaZC2XkYSVsnlHQdBQSLRPPnZCBx2OUZAIzSIbDc"
         url = "https://graph.facebook.com/v8.0/me/messages?access_token=" + access_token
-        
-        
+
         sender_json = {
-                        "input": {
-                                "text": text,
-                                "client": "bank",
-                                "socket_id": sender_id
-                            }
-                        }
-        
+            "input": {
+                "text": text,
+                "client": "bank",
+                "socket_id": sender_id
+            }
+        }
+
         msg = send(sio, sender_json)
         reply_msg = msg['response']
         body = {"messaging_type": "RESPONSE",
@@ -263,17 +269,16 @@ def sendtofb(sender_id, text):
         print("in func")
         print(x.text)
     except Exception as e:
-        print('sendtofb:: /api/fb Failed: '+ str(e))
-
-    
-
-# =================================================================================
-    # Definition of facebook social media functions
-# =================================================================================
+        print('sendtofb:: /api/fb Failed: ' + str(e))
 
 
 # =================================================================================
-    # Definition of WhatsApp social media functions
+# Definition of facebook social media functions
+# =================================================================================
+
+
+# =================================================================================
+# Definition of WhatsApp social media functions
 # =================================================================================
 @app.route("/api/wa", methods=['GET', 'POST'])
 def wachat():
@@ -284,7 +289,7 @@ def wachat():
     incoming_ph_no_digit = re.findall(r'\d+', incoming_ph_no_extract)
     incoming_ph_no = (''.join(incoming_ph_no_digit)).strip()
     print("====Inside whatsapp chat ===========")
-    print(incoming_msg)    
+    print(incoming_msg)
     print(incoming_msg_id)
     print(incoming_ph_no_extract)
     print(incoming_ph_no)
@@ -295,23 +300,23 @@ def wachat():
     responded = False
 
     sender_json = {
-                    "input": {
-                            "text": incoming_msg,
-                            "client": "bank",
-                            "socket_id": incoming_ph_no
-                        }
-                    }
+        "input": {
+            "text": incoming_msg,
+            "client": "bank",
+            "socket_id": incoming_ph_no
+        }
+    }
     print("sender_json: " + str(sender_json))
     try:
         reply_msg_return = send(sio, sender_json)
         reply_msg = reply_msg_return['response']
     except Exception as e:
-        print('train_chatbot:: /api/wa Failed: '+ str(e))
+        print('train_chatbot:: /api/wa Failed: ' + str(e))
         reply_msg = "Oops! it seems there is some difficulties in the system, please try again later"
-    
+
     print("reply_msg: " + reply_msg)
     msg.body(reply_msg)
-    responded=True
+    responded = True
 
     if not responded:
         msg.body('Not sure I understand, Please try again')
@@ -319,19 +324,18 @@ def wachat():
 
 
 # =================================================================================
-    # Definition of WhatsApp social media functions
+# Definition of WhatsApp social media functions
 # =================================================================================
 
 
 # =================================================================================
-    # Definition of Google Voice social media functions
+# Definition of Google Voice social media functions
 # =================================================================================
 @app.route("/api/googlevoice", methods=['GET', 'POST'])
 def googlevoicechat():
-
     try:
-        print("Inside google voice")   
-        print("input json: " + str(request.json)) 
+        print("Inside google voice")
+        print("input json: " + str(request.json))
         print(request.host_url)
         print("handler: " + request.json["handler"]["name"])
         # handler = request.json["handler"]["name"]
@@ -341,16 +345,16 @@ def googlevoicechat():
         session_id = request.json["session"]["id"]
 
         sender_json = {
-                        "input": {
-                                "text": intent_query,
-                                "client": "bank",
-                                "socket_id": session_id
-                            }
-                        }
-        
+            "input": {
+                "text": intent_query,
+                "client": "bank",
+                "socket_id": session_id
+            }
+        }
+
         msg = send(sio, sender_json)
         reply_msg = msg['response']
-        if msg['tag']=="goodbye" or msg['tag']=="thanks":
+        if msg['tag'] == "goodbye" or msg['tag'] == "thanks":
             next_scene = "actions.scene.END_CONVERSATION"
             clear_expired_contexts(session_id)
         else:
@@ -359,40 +363,41 @@ def googlevoicechat():
         print(next_scene)
         print(reply_msg)
         body = {
-                "session": {
-                    "id": session_id,
-                    "params": {}
-                },
-                "prompt": {
-                    "override": "false",
-                    "firstSimple": {
+            "session": {
+                "id": session_id,
+                "params": {}
+            },
+            "prompt": {
+                "override": "false",
+                "firstSimple": {
                     "speech": reply_msg,
                     "text": ""
-                    }
-                },
-                "scene": {
-                    "name": "SceneName",
-                    "slots": {},
-                    "next": {
-                        "name": next_scene
-                    }
-                  }
                 }
+            },
+            "scene": {
+                "name": "SceneName",
+                "slots": {},
+                "next": {
+                    "name": next_scene
+                }
+            }
+        }
 
         # json_reply_to_google_voice = requests.post(url, json=body)
         return body
 
     except Exception as e:
-        print('googlevoicechat:: /api/googlevoice Failed: '+ str(e))      
+        print('googlevoicechat:: /api/googlevoice Failed: ' + str(e))
 
-
-# =================================================================================
+    # =================================================================================
     # Definition of Google Voice social media functions
+
+
 # =================================================================================
 
 
 # =================================================================================
-    # Definition of Alexa Voice functions
+# Definition of Alexa Voice functions
 # =================================================================================
 
 @app.route("/api/alexa", methods=['GET', 'POST'])
@@ -482,15 +487,16 @@ def alexachat():
 
     return response_body, 200
 
+
 # =================================================================================
-    # Definition of Alexa Voice functions
+# Definition of Alexa Voice functions
 # =================================================================================
 
 
 # =================================================================================
-    # Definition of main function
+# Definition of main function
 # =================================================================================
-if __name__ == "__main__":    
+def main():
     sio.run(app, debug=True)
     # sio.run(
     #     app,
@@ -506,7 +512,7 @@ if __name__ == "__main__":
 #     # app.run(debug=True)
 #     # socketio.run(app, debug = True, use_reloader = False, port=PORT)
 # =================================================================================
-    # Definition of main function
+# Definition of main function
 # =================================================================================
 
 

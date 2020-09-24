@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 	
 setup_args = dict(
     name='chatbotpackage',
-    version='0.7',
+    version='0.14',
     description='chatbotpackage',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,
